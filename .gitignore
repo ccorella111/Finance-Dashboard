@@ -1,0 +1,35 @@
+# Entornos virtuales
+venv/
+ENV/
+env/
+.venv/
+
+# Archivos específicos de Django
+db.sqlite3
+db.sqlite3-journal
+*.log
+local_settings.py
+
+# Archivos compilados de Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Tailwind Standalone / sistemas operativos
+# Ignora el ejecutable .exe de Tailwind descargado en Windows
+theme/static_src/.tailwind/
+.tailwind/
+*.exe
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Editores de código (Opcional, pero recomendado)
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
