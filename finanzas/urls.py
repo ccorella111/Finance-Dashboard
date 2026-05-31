@@ -9,5 +9,5 @@ urlpatterns = [
     path('register/',views.register_view, name='register'),
 
     #dashboard
-    path('dashboard/',views.dashboard_view, name='dashboard')
+    path('dashboard/',views.dashboard_view, name='dashboard'),
 ]
