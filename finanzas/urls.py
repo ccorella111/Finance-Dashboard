@@ -10,4 +10,14 @@ urlpatterns = [
 
     #dashboard
     path('dashboard/',views.dashboard_view, name='dashboard'),
+
+    #ingresos
+    path('dashboard/ingresos/', views.register_incomes_view, name='register_incomes'),
+    path('ingreso/<int:id>/borrar/', views.delete_income_register, name='delete_income'),
+    path('ingreso/<int:id>/editar/', views.edit_income_register, name='edit_income'),
+
+    #gastos
+    path('dashboard/gastos/', views.register_expenses_view, name='register_expenses'),
+
+
 ]

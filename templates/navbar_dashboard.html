@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div>
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-4xl font-extrabold text-white tracking-tight">Financy</h1>
+        <div class="text-sm text-gray-400">
+            Bienvenido, <Span class="text-emerald-300 font-semibold">{{request.user.first_name}}</Span>
+        </div>
+    </div>
+ 
+    <div class="flex space-x-2 border-b border-gray-700 pb-2">
+
+        <a href="{% url 'dashboard' %}" 
+        class="flex items-center gap-2 px-4 py-5 rounded-lg text-sm font-medium transition cursor-pointer
+        {% if request.resolver_match.url_name == 'dashboard' %}
+        text-emerald-400 bg-gray-800
+        {% else %}
+        text-gray-400 hover:text-white hover:bg-gray-800
+        {% endif %}">
+            <i class="fa-solid fa-chart-pie" style="color: rgb(238, 189, 22);"></i>
+            Tablero principal
+        </a>
+
+        <a href="{% url 'register_incomes' %}" class="flex items-center gap-2 px-5 py-4 rounded-lg text-sm font-medium transition cursor-pointer
+        {% if request.resolver_match.url_name == 'register_incomes' %}
+        text-emerald-400 bg-gray-800
+        {% else %}
+        text-gray-400 hover:text-white hover:bg-gray-800
+        {% endif %}">
+            <i class="fa-solid fa-money-bill text-blue-400"></i>
+            Registrar ingresos
+        </a>
+
+        <a href="{% url 'register_expenses' %}" class="flex items-center gap-2 px-5 py-4 rounded-lg text-sm font-medium transition cursor-pointer
+        {% if request.resolver_match.url_name == 'register_expenses' %}
+        text-emerald-400 bg-gray-800
+        {% else %}
+        text-gray-400 hover:text-white hover:bg-gray-800
+        {% endif %}">
+            <i class="fa-solid fa-receipt text-rose-400"></i>
+            Registrar gastos
+        </a>
+    </div>
+
+</div>
+{% endblock content %}

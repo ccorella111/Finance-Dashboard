@@ -1,13 +1,47 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto">
-    <h1 class="text-3xl font-bold text-emerald-400 mb-2">Mi Dashboard Financiero</h1>
-    <p class="text-gray-400 mb-6">Bienvenido a tu control de ingresos y gastos.</p>
+<div class="max-w-6xl mx-auto px-4 py-8 relative">
+    
+    {% include 'navbar_dashboard.html' %}
 
-    <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg">
-        <h2 class="text-sm uppercase tracking-wider text-gray-400">Balance Total</h2>
-        <p class="text-4xl font-extrabold text-emerald-300 mt-2">$2,450.00</p>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-gray-800 border border-gray-700 p-6 rounded-xl shadow-md">
+            <p>Balance Total</p>
+            <h3 class="text-3xl font-bold text-emerald-400 mt-2">$2,540.00</h3>
+        </div>
+        <div class="bg-gray-800 border border-gray-700 p-6 rounded-xl shadow-md">
+            <p>Ingresos Totales</p>
+            <h3 class="text-3xl font-bold text-blue-400 mt-2">$3,100.00</h3>
+        </div>
+        <div class="bg-gray-800 border border-gray-700 p-6 rounded-xl shadow-md">
+            <p>Gastos Totales</p>
+            <h3 class="text-3xl font-bold text-rose-400 mt-2">$650.00</h3>
+        </div>
     </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="lg:col-span-2 bg-gray-800 border border-gray-700 p-6 rounded-xl h-80 flex items-center justify-center">
+            <div class="text-center">
+                <span class="text-gray-500 text-5xl">Grafico</span>
+                <p class="text-gray-400 mt-2 font-medium">Espacio reservado para graficos</p>
+                <p class="text-gray-600 text-xs">Implementar con chart.js o alternativas</p>
+            </div>
+        </div>
+        
+        <div class="bg-gray-800 border border-gray-700 p-6 rounded-xl flex flex-col justify-between">
+            <div>
+                <h3 class="text-lg font-bold text-gray-200 mb-4">Últimos movimientos</h3>
+                <div class="space-y-3">
+                    Contenido de movimientos
+                </div>
+            </div>
+            <a href="" class="text-xs text-center text-emerald-400 hover:underline font-medium mt-4 block">
+                Ver historial completo
+            </a>
+        </div>
+    </div>
+
 </div>
+
 {% endblock content %}

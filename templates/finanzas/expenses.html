@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-8 relative">
+
+    {% include 'navbar_dashboard.html'%}
+
+    
+    <div id="modal-gasto" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div class="bg-gray-800 border border-gray-700 rounded-xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b border-gray-700 pb-3">
+                <h3 class="text-xl font-bold text-rose-400">Nuevo gasto</h3>
+                <button class="close-modal text-gray-400 hover:text-white text-xl cursor-pointer">&times;</button>
+            </div>
+            <form method="POST" class="space-y-4">
+                {% csrf_token %}
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1">Descripcion</label>
+                    <input 
+                    type="text"
+                    name="descripcion"
+                    required
+                    placeholder="Ej. Almuerzo"
+                    class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-rose-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1">Monto ($)</label>
+                    <input 
+                    type="number"
+                    name="monto"
+                    required
+                    step="0.01"
+                    placeholder="0.00"
+                    class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-rose-500">
+                </div>
+                <button type="submit" class="w-full bg-rose-500 hover:bg-rose-600 text-gray-900 font-bold py-2.5 rounded-lg transition cursor-pointer">
+                    Guardar Gasto
+                </button>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+{% endblock content %}
