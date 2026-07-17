@@ -3,7 +3,7 @@ from django.contrib.auth import login,authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import Transaction,IncomeForm
+from .models import Transaction,IncomeForm,ExpenseForm
 from django.core.paginator import Paginator,PageNotAnInteger,EmptyPage
 from django.urls import reverse
 
@@ -145,8 +145,85 @@ def delete_income_register(request, id):
     return redirect('register_incomes')
 
 
+
 @login_required
 def register_expenses_view(request):
-    
-    return render(request, 'finanzas/expenses.html') 
+
+    gastos_list = Transaction.objects.filter(usuario = request.user, tipo = 'gasto').order_by('-fecha')
+
+    paginator = Paginator(gastos_list, 10)
+
+    page = request.GET.get('page')
+
+    try:
+        gastos = paginator.page(page)
+    except PageNotAnInteger:
+        gastos = paginator.page(1)
+    except EmptyPage:
+        gastos = paginator.page(paginator.num_pages)
+
+    form_has_errors = False
+
+    if request.method == 'POST':
+
+        form = ExpenseForm(request.POST)
+
+        if form.is_valid():
+            new_expense = form.save(commit=False)
+            new_expense.usuario = request.user
+            new_expense.tipo = 'gasto'
+            new_expense.fuente = 'ninguna'
+            new_expense.save()
+            messages.success(request, '¡Gasto registrado exitosamente!')
+            return redirect(f"{reverse('register_expenses')}?page={page or 1}")
+        form_has_errors = True
+        return render(request, 'finanzas/expenses.html', 
+                      {'form': form, 'gastos': gastos, 'show_modal': True, 'form_has_errors': form_has_errors, 'is_editing': False})
+    else:
+        form = ExpenseForm()
+
+    # Si entra por primera vez (GET), mostramos la página limpia
+    return render(request, 'finanzas/expenses.html', 
+                  {'form': form, 'gastos' : gastos, 'show_modal': False, 'form_has_errors': form_has_errors, 'is_editing': False})
+
+
+
+@login_required
+def edit_expense_register(request, id):
+
+    gasto = get_object_or_404(Transaction, id=id, usuario=request.user, tipo='gasto')
+    gastos_list = Transaction.objects.filter(usuario = request.user, tipo = 'gasto').order_by('-fecha')
+
+    paginator = Paginator(gastos_list, 10)
+
+    page = request.GET.get('page')
+
+    try:
+        gastos = paginator.page(page)
+    except PageNotAnInteger:
+        gastos = paginator.page(1)
+    except EmptyPage:
+        gastos = paginator.page(paginator.num_pages)
+
+    if request.method == 'POST':
+        form = ExpenseForm(request.POST, instance=gasto)
+        if form.is_valid():
+            form.save()
+            messages.success(request, '¡Gasto actualizado exitosamente!')
+            return redirect(f"{reverse('register_expenses')}?page={page or 1}")
+    else:
+        form = ExpenseForm(instance=gasto)
+
+    return render(request, 'finanzas/expenses.html', 
+                  {'form':form, 'gasto': gasto, 'gastos': gastos, 'show_modal': True, 'form_has_errors': False, 'is_editing': True})
+
+
+
+@login_required
+def delete_expense_register(request, id):
+    if request.method == 'POST':
+        gasto = get_object_or_404(Transaction, id=id, usuario=request.user, tipo='gasto')
+        gasto.delete()
+
+    return redirect('register_expenses')
 

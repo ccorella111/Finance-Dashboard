@@ -1,45 +1,249 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto px-4 py-8 relative">
-
-    {% include 'navbar_dashboard.html'%}
+<div class="max-w-6xl mx-auto px-4 py-8 relative flex flex-col gap-8">
+    {% include 'navbar_dashboard.html' %}
 
     
-    <div id="modal-gasto" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-        <div class="bg-gray-800 border border-gray-700 rounded-xl max-w-md w-full p-6 shadow-2xl space-y-4">
-            <div class="flex justify-between items-center border-b border-gray-700 pb-3">
-                <h3 class="text-xl font-bold text-rose-400">Nuevo gasto</h3>
-                <button class="close-modal text-gray-400 hover:text-white text-xl cursor-pointer">&times;</button>
+    <div id="modal_gasto" class="{% if show_modal %}flex{% else %}hidden{% endif %} fixed inset-0 bg-black/60 backdrop-blur-sm items-center justify-center z-50">
+
+        <div class="bg-gray-800 border border-gray-700 rounded-xl max-w-2xl w-full p-6 shadow-2xl space-y-4">
+
+            <div class="flex justify-between items-center border-b border-gray-700 pb-3 mb-4">
+                <h3 class="text-xl font-bold text-blue-400">
+                    <i class="fa-solid fa-file-invoice-dollar" style="color: rgb(255, 72, 72);"></i>
+                    {% if gasto %}
+                        Editar Gasto
+                    {% else %}
+                        Nuevo Gasto
+                    {% endif %}
+                </h3>
             </div>
-            <form method="POST" class="space-y-4">
+
+            <form method="POST">
                 {% csrf_token %}
-                <div>
-                    <label class="block text-sm font-medium text-gray-400 mb-1">Descripcion</label>
-                    <input 
-                    type="text"
-                    name="descripcion"
-                    required
-                    placeholder="Ej. Almuerzo"
-                    class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-rose-500">
+
+                {% if form.non_field_errors %}
+                    <div class="bg-red-900/50 text-red-200 p-3 rounded mb-4">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                <div class="flex gap-6 w-full">
+                    <div class="flex flex-col gap-8 justify-center w-full">
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-1">Descripcion</label>
+                            {{ form.descripcion }}
+                            {% if form.descripcion.errors %}
+                                <p class="text-red-500 text-xs mt-1">
+                                    {{ form.descripcion.errors.0 }}
+                                </p>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-1">Monto</label>
+                            {{ form.monto }}
+                            {% if form.monto.errors %}
+                                <p class="text-red-500 text-xs mt-1">
+                                    {{ form.monto.errors.0 }}
+                                </p>
+                            {% endif %}
+                        </div>
+
+                    </div>
+                    
+
+                    <div class="flex flex-col gap-8 justify-center w-full">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-1">Categoria</label>
+                            {{ form.categoria }}
+                            {% if form.categoria.errors %}
+                                <p class="text-red-500 text-xs mt-1">
+                                    {{ form.categoria.errors.0 }}
+                                </p>
+                            {% endif %} 
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-1">Fecha</label>
+                            {{ form.fecha }}
+                            {% if form.fecha.errors %}
+                                <p class="text-red-500 text-xs mt-1">
+                                    {{ form.fecha.errors.0 }}
+                                </p>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-400 mb-1">Monto ($)</label>
-                    <input 
-                    type="number"
-                    name="monto"
-                    required
-                    step="0.01"
-                    placeholder="0.00"
-                    class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-rose-500">
+
+                <div class="flex justify-center w-full">
+                    <button type="submit" class="mt-4 bg-blue-500 text-white font-bold py-3 px-6 rounded-lg  border-2 border-indigo-400 transition-all duration-300 transform hover:-translate-y-1 cursor-pointer">
+                        {% if gasto %}
+                            Guardar Cambios
+                        {% else %}
+                            Guardar Gasto
+                        {% endif %}
+                    </button>
                 </div>
-                <button type="submit" class="w-full bg-rose-500 hover:bg-rose-600 text-gray-900 font-bold py-2.5 rounded-lg transition cursor-pointer">
-                    Guardar Gasto
-                </button>
+
             </form>
         </div>
     </div>
 
+    <div class="flex justify-between">
+        <h2 class="text-2xl font-extrabold text-emerald-300 tracking-tight">Registros de Gastos</h2>
+        <button id="abrir_modal_gasto" type="button" class="bg-emerald-500 border border-gray-700 rounded-lg px-3 py-2 cursor-pointer">
+            <i class="fa-solid fa-plus" style="color: rgb(255, 255, 255);"></i>
+            Nuevo Gasto
+        </button>
+    </div>
+
+    <div class="">
+
+        <table class="w-full bg-gray-800 text-white rounded-lg overflow-hidden shadow-lg">
+            <thead>
+                <tr>
+                    <th class="bg-emerald-900 border-2 border-gray-700 px-4 py-2 text-xl">Descripción</th>
+                    <th class="bg-emerald-900 border-2 border-gray-700 px-4 py-2 text-xl">Monto</th>
+                    <th class="bg-emerald-900 border-2 border-gray-700 px-4 py-2 text-xl">Categoria</th>
+                    <th class="bg-emerald-900 border-2 border-gray-700 px-4 py-2 text-xl">Fecha</th>
+                    <th class="bg-emerald-900 border-2 border-gray-700 px-4 py-2 text-xl">Editar</th>
+                    <th class="bg-emerald-900 border-2 border-gray-700 px-4 py-2 text-xl">Eliminar</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for gasto in gastos %}
+                    <tr>
+                        <td class="border-2 border-gray-700 px-4 py-2 font-light text-center">{{gasto.descripcion}}</td>
+                        <td class="border-2 border-gray-700 px-4 py-2 font-light text-center">₡{{gasto.monto}}</td>
+                        <td class="border-2 border-gray-700 px-4 py-2 font-light text-center">{{gasto.get_categoria_display}}</td>
+                        <td class="border-2 border-gray-700 px-4 py-2 font-light text-center">{{gasto.fecha|date:"d/m/Y"}}</td>
+
+                        <td class="border border-gray-700 px-4 py-2 text-center">
+                            <a href="{% url 'edit_expense' gasto.id %}?page={{gastos.number}}" 
+                            class="hover:bg-yellow-900/30 p-2 rounded transition inline-block"
+                            title="Editar">
+                                <i class="fa-regular fa-pen-to-square text-2xl" style="color: rgb(255, 212, 59);"></i>
+                            </a>
+                        </td>
+
+                        <td class="border border-gray-700 px-4 py-2 text-center">
+                            <form action="{% url 'delete_expense' gasto.id %}" method='POST'
+                            onsubmit="return confirm('¿Eliminar gasto?')">
+                                {% csrf_token %}
+                                <button type="submit" class="cursor-pointer">
+                                    <i class="fa-regular fa-trash-can text-2xl" style="color: rgb(236, 0, 0);"></i>
+                                </button>
+                            </form>
+                        </td>
+
+                    </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="border border-gray-700 px-4 py-8 text-center text-gray-500 italic">
+                        <i class="fa-solid fa-folder-open mb-2 block text-2xl"></i>
+                        No has registrado ningún ingreso todavía
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if gastos.has_other_pages %}
+    <div class="flex justify-center items-center gap-2 mt-6">
+
+        {% if gastos.has_previous %}
+        <a href="{% url 'register_expenses' %}?page={{gastos.previous_page_number}}" 
+            class="px-3 py-1 bg-gray-800 text-gray-300 rounded hover:bg-gray-700 transition">
+            <i class="fa-solid fa-arrow-left" style="color: rgb(185, 194, 214);"></i>
+            Anterior
+        </a>
+        {% else %}
+        <span class="px-3 py-1 bg-gray-900 text-gray-600 rounded cursor-not-allowed">
+            <i class="fa-solid fa-arrow-left" style="color: rgb(185, 194, 214);"></i>
+            Anterior
+        </span>
+        {% endif %}
+
+
+        {% for num in gastos.paginator.page_range %}
+            {% if gastos.number == num %}
+                <span class="px-3 py-1 bg-emerald-600 text-white font-bold rounded">{{num}}</span>
+            {% elif num > gastos.number|add:'-3' and num < gastos.number|add:'3' %}
+                <a href="{% url 'register_expenses' %}?page={{num}}" class="px-3 py-1 bg-gray-800 text-gray-300 rounded hover:bg-gray-700 transition">
+                    {{num}}
+                </a>
+            {% endif %}
+        {% endfor %}
+
+
+        {% if gastos.has_next %}
+        <a href="{% url 'register_expenses' %}?page={{gastos.next_page_number}}" 
+            class="px-3 py-1 bg-gray-800 text-gray-300 rounded hover:bg-gray-700 transition">
+            <i class="fa-solid fa-arrow-right" style="color: rgb(185, 194, 214);"></i>
+            Siguiente
+        </a>
+        {% else %}
+        <span class="px-3 py-1 bg-gray-900 text-gray-600 rounded cursor-not-allowed">
+            <i class="fa-solid fa-arrow-right" style="color: rgb(185, 194, 214);"></i>
+            Siguiente
+        </span>
+        {% endif %}
+
+    </div>
+    {% endif %}
+
 </div>
+
+<script>
+    const btn_gasto = document.getElementById('abrir_modal_gasto');
+    const modal_gasto = document.getElementById('modal_gasto');
+    const form_gasto = modal_gasto.querySelector('form');
+
+    const isEditing = {{ is_editing|yesno:'true,false' }};
+    const formHasErrors = {{ form_has_errors|yesno:'true,false' }};
+    const currentPage = {{ gastos.number }};
+    const registerUrl = "{% url 'register_expenses' %}";
+
+    function closeModal() {
+        if (formHasErrors) return; // no cerrar si hay errores sin corregir
+
+        if (isEditing) {
+            window.location.href = `${registerUrl}?page=${currentPage}`;
+        } else {
+            modal_gasto.classList.add('hidden');
+            modal_gasto.classList.remove('flex');
+            form_gasto.reset();
+        }
+    }
+
+    function openModal() {
+        if (isEditing) {
+            window.location.href = `${registerUrl}?page=${currentPage}&nuevo=1`;
+        } else {
+            modal_gasto.classList.remove('hidden');
+            modal_gasto.classList.add('flex');
+        }
+    }
+
+    if (btn_gasto && modal_gasto) {
+
+        btn_gasto.addEventListener('click', openModal);
+
+        modal_gasto.addEventListener('click', (e) => {
+            if (e.target === modal_gasto) closeModal();
+        });
+
+        document.querySelectorAll('.close-modal-gasto').forEach(btn => {
+            btn.addEventListener('click', closeModal);
+        });
+    }
+
+
+</script>
 
 {% endblock content %}
