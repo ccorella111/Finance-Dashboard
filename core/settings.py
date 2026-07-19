@@ -28,6 +28,8 @@ DEBUG = config("DEBUG", default=False, cast=bool)
 
 ALLOWED_HOSTS = config("ALLOWED_HOST", cast=Csv())
 
+LOGOUT_REDIRECT_URL = 'login'
+
 
 # Application definition
 
