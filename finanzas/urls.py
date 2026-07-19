@@ -10,6 +10,7 @@ urlpatterns = [
 
     #dashboard
     path('dashboard/',views.dashboard_view, name='dashboard'),
+    path('api/dashboard-data/', views.dashboard_data_api, name='dashboard_data_api'),
 
     #ingresos
     path('dashboard/ingresos/', views.register_incomes_view, name='register_incomes'),

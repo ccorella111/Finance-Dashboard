@@ -101,6 +101,7 @@
     </div>
 
     <div class="">
+        {% load humanize %}
 
         <table class="w-full bg-gray-800 text-white rounded-lg overflow-hidden shadow-lg">
             <thead>
@@ -118,7 +119,7 @@
                 {% for ingreso in ingresos %}
                     <tr>
                         <td class="border-2 border-gray-700 px-4 py-2 font-light text-center">{{ingreso.descripcion}}</td>
-                        <td class="border-2 border-gray-700 px-4 py-2 font-light text-center">₡{{ingreso.monto}}</td>
+                        <td class="border-2 border-gray-700 px-4 py-2 font-light text-center">₡{{ingreso.monto|intcomma}}</td>
                         <td class="border-2 border-gray-700 px-4 py-2 font-light text-center">{{ingreso.get_fuente_display}}</td>
                         <td class="border-2 border-gray-700 px-4 py-2 font-light text-center">{{ingreso.fecha|date:"d/m/Y"}}</td>
 
@@ -131,8 +132,7 @@
                         </td>
 
                         <td class="border border-gray-700 px-4 py-2 text-center">
-                            <form action="{% url 'delete_income' ingreso.id %}" method='POST'
-                            onsubmit="return confirm('¿Eliminar ingreso?')">
+                            <form action="{% url 'delete_income' ingreso.id %}" method='POST' class="form-eliminar-ingreso">
                                 {% csrf_token %}
                                 <button type="submit" class="cursor-pointer">
                                     <i class="fa-regular fa-trash-can text-2xl" style="color: rgb(236, 0, 0);"></i>
@@ -245,5 +245,33 @@
 
 
 </script>
+
+{% block extra_scripts %}
+<script>
+    document.querySelectorAll('.form-eliminar-ingreso').forEach(form => {
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            Swal.fire({
+                title: '¿Eliminar ingreso?',
+                text: 'Esta acción no se puede deshacer.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e11d48',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar',
+                background: '#1f2937',
+                color: '#f3f4f6',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                    
+                }
+            });
+        });
+    });
+</script>
+{% endblock extra_scripts %}
 
 {% endblock content %}

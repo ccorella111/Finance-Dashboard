@@ -57,7 +57,7 @@ class Transaction (models.Model):
 class IncomeForm(forms.ModelForm):
 
     FUENTE_CHOICES = [
-        ('', 'Seleccione una opción'), # Opción por defecto
+        ('', 'Seleccione una opción'),
         ('salario', 'Salario'),
         ('servicios_profesionales', 'Servicios Profesionales'),
         ('freelance', 'Freelance'),
@@ -97,7 +97,7 @@ class IncomeForm(forms.ModelForm):
 class ExpenseForm(forms.ModelForm):
 
     CATEGORIA_CHOICES = [
-        ('', 'Seleccione una opción'), # Opción por defecto
+        ('', 'Seleccione una opción'),
         ('comida', 'Comida'),
         ('agua', 'Agua'),
         ('electricidad', 'Electricidad'),

@@ -11,7 +11,7 @@
 
             <div class="flex justify-between items-center border-b border-gray-700 pb-3 mb-4">
                 <h3 class="text-xl font-bold text-blue-400">
-                    <i class="fa-solid fa-file-invoice-dollar" style="color: rgb(255, 72, 72);"></i>
+                    <i class="fa-solid fa-receipt text-rose-400"></i>
                     {% if gasto %}
                         Editar Gasto
                     {% else %}
@@ -101,7 +101,7 @@
     </div>
 
     <div class="">
-
+        {% load humanize %}
         <table class="w-full bg-gray-800 text-white rounded-lg overflow-hidden shadow-lg">
             <thead>
                 <tr>
@@ -118,7 +118,7 @@
                 {% for gasto in gastos %}
                     <tr>
                         <td class="border-2 border-gray-700 px-4 py-2 font-light text-center">{{gasto.descripcion}}</td>
-                        <td class="border-2 border-gray-700 px-4 py-2 font-light text-center">₡{{gasto.monto}}</td>
+                        <td class="border-2 border-gray-700 px-4 py-2 font-light text-center">₡{{gasto.monto|intcomma}}</td>
                         <td class="border-2 border-gray-700 px-4 py-2 font-light text-center">{{gasto.get_categoria_display}}</td>
                         <td class="border-2 border-gray-700 px-4 py-2 font-light text-center">{{gasto.fecha|date:"d/m/Y"}}</td>
 
@@ -131,8 +131,7 @@
                         </td>
 
                         <td class="border border-gray-700 px-4 py-2 text-center">
-                            <form action="{% url 'delete_expense' gasto.id %}" method='POST'
-                            onsubmit="return confirm('¿Eliminar gasto?')">
+                            <form action="{% url 'delete_expense' gasto.id %}" method='POST'class="form-eliminar-gasto">
                                 {% csrf_token %}
                                 <button type="submit" class="cursor-pointer">
                                     <i class="fa-regular fa-trash-can text-2xl" style="color: rgb(236, 0, 0);"></i>
@@ -245,5 +244,33 @@
 
 
 </script>
+
+{% block extra_scripts %}
+<script>
+    document.querySelectorAll('.form-eliminar-gasto').forEach(form => {
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            Swal.fire({
+                title: '¿Eliminar gasto?',
+                text: 'Esta acción no se puede deshacer.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e11d48',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar',
+                background: '#1f2937',
+                color: '#f3f4f6',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                    
+                }
+            });
+        });
+    });
+</script>
+{% endblock extra_scripts %}
 
 {% endblock content %}
