@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div>
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-4xl font-extrabold text-white tracking-tight">Financy</h1>
+
+        <div class="relative group text-sm text-gray-400 cursor-pointer">
+            Bienvenido, <span class="text-emerald-300 font-semibold">{{request.user.first_name}}</span>
+
+            <div class="absolute right-0 top-full mt-2 w-40 bg-gray-800 border border-gray-700 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                <form action="{% url 'logout' %}" method="POST">
+                    {% csrf_token %}
+                    <button type="submit" class="w-full text-left px-4 py-2 text-rose-400 hover:bg-gray-700 rounded-lg cursor-pointer flex items-center gap-2">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        Cerrar sesión
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+ 
+    <div class="flex space-x-2 border-b border-gray-700 pb-2">
+
+        <a href="{% url 'dashboard' %}" 
+        class="flex items-center gap-2 px-4 py-5 rounded-lg text-sm font-medium transition cursor-pointer
+        {% if request.resolver_match.url_name == 'dashboard' %}
+        text-emerald-400 bg-gray-800
+        {% else %}
+        text-gray-400 hover:text-white hover:bg-gray-800
+        {% endif %}">
+            <i class="fa-solid fa-chart-pie" style="color: rgb(238, 189, 22);"></i>
+            Tablero principal
+        </a>
+
+        <a href="{% url 'register_incomes' %}" class="flex items-center gap-2 px-5 py-4 rounded-lg text-sm font-medium transition cursor-pointer
+        {% if request.resolver_match.url_name == 'register_incomes' %}
+        text-emerald-400 bg-gray-800
+        {% else %}
+        text-gray-400 hover:text-white hover:bg-gray-800
+        {% endif %}">
+            <i class="fa-solid fa-money-bill text-blue-400"></i>
+            Registrar ingresos
+        </a>
+
+        <a href="{% url 'register_expenses' %}" class="flex items-center gap-2 px-5 py-4 rounded-lg text-sm font-medium transition cursor-pointer
+        {% if request.resolver_match.url_name == 'register_expenses' %}
+        text-emerald-400 bg-gray-800
+        {% else %}
+        text-gray-400 hover:text-white hover:bg-gray-800
+        {% endif %}">
+            <i class="fa-solid fa-file-invoice-dollar" style="color: rgb(255, 72, 72);"></i>
+            Registrar gastos
+        </a>
+    </div>
+
+</div>
+{% endblock content %}

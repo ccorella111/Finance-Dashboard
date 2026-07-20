@@ -1,0 +1,320 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-8 relative">
+
+    {% include 'navbar_dashboard.html' %}
+
+    <div class="flex flex-wrap gap-3 items-center mb-6 bg-gray-800 border border-gray-700 rounded-xl p-4 mt-4">
+        <label class="text-sm text-gray-400 font-medium px-4">Rango:</label>
+        <select id="rango-select" class="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500">
+            <option value="hoy">Hoy</option>
+            <option value="semana">Última semana</option>
+            <option value="mes" selected>Último mes</option>
+            <option value="anio">Último año</option>
+            <option value="personalizado">Personalizado</option>
+        </select>
+
+        <div id="rango-personalizado" class="hidden gap-2 items-center px-4">
+            <input type="date" id="fecha-inicio-input" class="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm">
+            <span class="text-gray-500">a</span>
+            <input type="date" id="fecha-fin-input" class="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm">
+            <button id="aplicar-rango-btn" class="bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-bold px-4 py-2 rounded-lg cursor-pointer">
+                Aplicar
+            </button>
+        </div>
+
+        <label class="text-sm text-gray-400 font-medium px-4">Gráfico:</label>
+        <select id="chart-select" class="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500">
+            <option value="" selected>Seleccione una opción</option>
+            <option value="gastos_pie">Gastos por categoría</option>
+            <option value="ingresos_pie">Ingresos por fuente</option>
+            <option value="balance_linea">Balance a través del tiempo</option>
+            <option value="gastos_barra">Gastos</option>
+            <option value="ingresos_barra">Ingresos</option>
+        </select>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-gray-800 border border-gray-700 p-6 rounded-xl shadow-md">
+            <p class="text-lg font-bold text-gray-200">Balance Total</p>
+            <h3 id="valor-balance" class="text-3xl font-bold text-emerald-400 mt-2">₡0</h3>
+        </div>
+        <div class="bg-gray-800 border border-gray-700 p-6 rounded-xl shadow-md">
+            <p class="text-lg font-bold text-gray-200">Ingresos Totales</p>
+            <h3 id="valor-ingresos" class="text-3xl font-bold text-blue-400 mt-2">₡0</h3>
+        </div>
+        <div class="bg-gray-800 border border-gray-700 p-6 rounded-xl shadow-md">
+            <p class="text-lg font-bold text-gray-200">Gastos Totales</p>
+            <h3 id="valor-gastos" class="text-3xl font-bold text-rose-400 mt-2">₡0</h3>
+        </div>
+    </div>
+
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="lg:col-span-2 bg-gray-800 p-4 rounded-xl h-120 flex items-center justify-center">
+            <div class="text-center w-full">
+                <div id="modal_gastos_pie" class="hidden border border-gray-700 p-6 rounded-xl h-full w-full">
+                    <canvas id="chart-pie-gastos"></canvas>
+                </div>
+
+                <div id="modal_ingresos_pie" class="hidden bg-gray-800 border border-gray-700 p-6 rounded-xl h-full w-full">
+                    <canvas id="chart-pie-ingresos"></canvas>
+                </div>
+                
+                <div id="modal_balance_linea" class="hidden bg-gray-800 border border-gray-700 p-6 rounded-xl h-full w-full">
+                    <canvas id="chart-linea-balance"></canvas>
+                </div>
+
+                <div id="modal_gastos_barra" class="hidden bg-gray-800 border border-gray-700 p-6 rounded-xl h-full w-full">
+                    <canvas id="chart-barras-gastos"></canvas>
+                </div>
+
+                <div id="modal_ingresos_barra" class="hidden bg-gray-800 border border-gray-700 p-6 rounded-xl h-full w-full">
+                    <canvas id="chart-barras-ingresos"></canvas>
+                </div>
+            </div>
+            
+        </div>
+        
+        <div class="bg-gray-800 border border-gray-700 p-6 rounded-xl flex flex-col justify-between">
+            <div>
+                <h3 class="border-b border-gray-700 text-lg font-bold text-gray-200 mb-2 py-2">Últimos movimientos</h3>
+                <div class="space-y-3">
+                    {% if ultimos_movimientos %}
+                        {% for mov in ultimos_movimientos %}
+                            <div class="grid grid-cols-3 flex justify-between border-b border-gray-700">
+
+                                <span class="col-span-2 text-gray-200">{{ mov.descripcion }}</span>
+
+                                <div class=" col-span-1 flex flex-col gap-2 items-left">
+                                    <div>
+                                        <span class="font-bold {% if mov.tipo == 'ingreso' %}text-emerald-400{% else %}text-rose-400{% endif %}">
+                                        {% if mov.tipo == 'ingreso' %}
+                                            Ingreso
+                                        {% else %}
+                                            Gasto
+                                        {% endif %}
+                                    </span>
+                                    </div>
+                                    <div>
+                                        <span>₡{{ mov.monto|intcomma }}</span>
+                                    </div>
+                                    
+                                </div>
+
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p>No hay transacciones disponibles</p>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="flex justify-between">
+                <a href="{% url 'register_incomes' %}" class="text-xs text-center text-emerald-400 hover:underline font-medium mt-4 block">
+                    Ver historial ingresos
+                </a>
+                <a href="{% url 'register_expenses' %}" class="text-xs text-center text-rose-400 hover:underline font-medium mt-4 block">
+                    Ver historial gastos
+                </a>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+    const COLORS = ['#34d399', '#60a5fa', '#fbbf24', '#f472b6', '#a78bfa', '#fb7185', '#22d3ee', '#facc15'];
+    const AXIS_COLOR = '#d1d5db';
+    const GRID_COLOR = '#374151';
+
+    function formatearColones(valor) {
+        return '₡' + valor.toLocaleString('es-CR', { maximumFractionDigits: 0 });
+    }
+
+    const chartPieGastos = new Chart(document.getElementById('chart-pie-gastos'), {
+        type: 'doughnut',
+        data: { labels: [], datasets: [{ data: [], backgroundColor: COLORS }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: AXIS_COLOR } }, title: { display: true, text: 'Gastos por categoría', color: AXIS_COLOR } } }
+    });
+
+    const chartPieIngresos = new Chart(document.getElementById('chart-pie-ingresos'), {
+        type: 'doughnut',
+        data: { labels: [], datasets: [{ data: [], backgroundColor: COLORS }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: AXIS_COLOR } }, title: { display: true, text: 'Ingresos por fuente', color: AXIS_COLOR } } }
+    });
+
+    const chartLineaBalance = new Chart(document.getElementById('chart-linea-balance'), {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [
+                { label: 'Ingresos', data: [], borderColor: '#34d399', backgroundColor: 'rgba(52,211,153,0.08)', tension: 0.3 },
+                { label: 'Gastos', data: [], borderColor: '#fb7185', backgroundColor: 'rgba(251,113,133,0.08)', tension: 0.3 },
+                { label: 'Balance acumulado', data: [], borderColor: '#60a5fa', backgroundColor: 'rgba(96,165,250,0.08)', tension: 0.3, fill: true },
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { labels: { color: AXIS_COLOR } } },
+            scales: {
+                x: { ticks: { color: AXIS_COLOR }, grid: { display: false } },
+                y: { ticks: { color: AXIS_COLOR }, grid: { color: GRID_COLOR } }
+            }
+        }
+    });
+
+    const chartBarrasGastos = new Chart(document.getElementById('chart-barras-gastos'), {
+        type: 'bar',
+        data: { labels: [], datasets: [{ label: 'Monto', data: [], backgroundColor: '#fb7185', borderRadius: 6 }] },
+        options: {
+            indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false }, title: { display: true, text: 'Gastos por categoría', color: AXIS_COLOR } },
+            scales: { x: { ticks: { color: AXIS_COLOR }, grid: { color: GRID_COLOR } }, y: { ticks: { color: AXIS_COLOR }, grid: { display: false } } }
+        }
+    });
+
+    const chartBarrasIngresos = new Chart(document.getElementById('chart-barras-ingresos'), {
+        type: 'bar',
+        data: { labels: [], datasets: [{ label: 'Monto', data: [], backgroundColor: '#34d399', borderRadius: 6 }] },
+        options: {
+            indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false }, title: { display: true, text: 'Ingresos por fuente', color: AXIS_COLOR } },
+            scales: { x: { ticks: { color: AXIS_COLOR }, grid: { color: GRID_COLOR } }, y: { ticks: { color: AXIS_COLOR }, grid: { display: false } } }
+        }
+    });
+
+    async function actualizarGraficos(rango, fechaInicio = null, fechaFin = null) {
+        let url = `{% url 'dashboard_data_api' %}?rango=${rango}`;
+        if (rango === 'personalizado' && fechaInicio && fechaFin) {
+            url += `&fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}`;
+        }
+
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (!response.ok) {
+                Swal.fire({ icon: 'error', title: data.error || 'Error al cargar los datos', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
+                return;
+            }
+
+            document.getElementById('valor-balance').textContent = formatearColones(data.balance);
+            document.getElementById('valor-ingresos').textContent = formatearColones(data.ingresos_totales);
+            document.getElementById('valor-gastos').textContent = formatearColones(data.gastos_totales);
+
+            chartPieGastos.data.labels = data.pie_gastos.labels;
+            chartPieGastos.data.datasets[0].data = data.pie_gastos.data;
+            chartPieGastos.update();
+
+            chartPieIngresos.data.labels = data.pie_ingresos.labels;
+            chartPieIngresos.data.datasets[0].data = data.pie_ingresos.data;
+            chartPieIngresos.update();
+
+            chartLineaBalance.data.labels = data.linea_labels;
+            chartLineaBalance.data.datasets[0].data = data.linea_ingresos;
+            chartLineaBalance.data.datasets[1].data = data.linea_gastos;
+            chartLineaBalance.data.datasets[2].data = data.linea_balance;
+            chartLineaBalance.update();
+
+            chartBarrasGastos.data.labels = data.pie_gastos.labels;
+            chartBarrasGastos.data.datasets[0].data = data.pie_gastos.data;
+            chartBarrasGastos.update();
+
+            chartBarrasIngresos.data.labels = data.pie_ingresos.labels;
+            chartBarrasIngresos.data.datasets[0].data = data.pie_ingresos.data;
+            chartBarrasIngresos.update();
+
+        } catch (error) {
+            console.error('Error actualizando gráficos:', error);
+        }
+    }
+
+    const rangoSelect = document.getElementById('rango-select');
+    const rangoPersonalizado = document.getElementById('rango-personalizado');
+    const fechaInicioInput = document.getElementById('fecha-inicio-input');
+    const fechaFinInput = document.getElementById('fecha-fin-input');
+    const aplicarRangoBtn = document.getElementById('aplicar-rango-btn');
+
+    const chartSelect = document.getElementById('chart-select')
+    const modalGastosPie = document.getElementById('modal_gastos_pie')
+    const modalIngresosPie = document.getElementById('modal_ingresos_pie')
+    const modalBalanceLinea = document.getElementById('modal_balance_linea')
+    const modalGastosBarra = document.getElementById('modal_gastos_barra')
+    const modalIngresosBarra = document.getElementById('modal_ingresos_barra')
+
+    rangoSelect.addEventListener('change', () => {
+        if (rangoSelect.value === 'personalizado') {
+            rangoPersonalizado.classList.remove('hidden');
+            rangoPersonalizado.classList.add('flex');
+        } else {
+            rangoPersonalizado.classList.add('hidden');
+            rangoPersonalizado.classList.remove('flex');
+            actualizarGraficos(rangoSelect.value);
+        }
+    });
+
+    aplicarRangoBtn.addEventListener('click', () => {
+        if (fechaInicioInput.value && fechaFinInput.value) {
+            actualizarGraficos('personalizado', fechaInicioInput.value, fechaFinInput.value);
+        }
+    });
+
+    chartSelect.addEventListener('change', () => {
+        switch(chartSelect.value){
+            case "gastos_pie":
+                modalGastosPie.classList.remove('hidden');
+                modalIngresosPie.classList.add('hidden');
+                modalBalanceLinea.classList.add('hidden');
+                modalGastosBarra.classList.add('hidden');
+                modalIngresosBarra.classList.add('hidden');
+                break;
+            case "ingresos_pie":
+                modalGastosPie.classList.add('hidden')
+                modalIngresosPie.classList.remove('hidden')
+                modalBalanceLinea.classList.add('hidden')
+                modalGastosBarra.classList.add('hidden')
+                modalIngresosBarra.classList.add('hidden')
+                break;
+            case "balance_linea":
+                modalGastosPie.classList.add('hidden');
+                modalIngresosPie.classList.add('hidden');
+                modalBalanceLinea.classList.remove('hidden');
+                modalGastosBarra.classList.add('hidden');
+                modalIngresosBarra.classList.add('hidden');
+                break;
+            case "gastos_barra":
+                modalGastosPie.classList.add('hidden');
+                modalIngresosPie.classList.add('hidden');
+                modalBalanceLinea.classList.add('hidden');
+                modalGastosBarra.classList.remove('hidden');
+                modalIngresosBarra.classList.add('hidden');
+                break;
+            case "ingresos_barra":
+                modalGastosPie.classList.add('hidden');
+                modalIngresosPie.classList.add('hidden');
+                modalBalanceLinea.classList.add('hidden');
+                modalGastosBarra.classList.add('hidden');
+                modalIngresosBarra.classList.remove('hidden');
+                break;
+            case "":
+                modalGastosPie.classList.add('hidden');
+                modalIngresosPie.classList.add('hidden');
+                modalBalanceLinea.classList.add('hidden');
+                modalGastosBarra.classList.add('hidden');
+                modalIngresosBarra.classList.add('hidden');
+                break;
+        }
+    })
+
+
+    actualizarGraficos(rangoSelect.value);
+</script>
+{% endblock extra_scripts %}
+{% endblock content %}
+
+
+
